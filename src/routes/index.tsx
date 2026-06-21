@@ -143,40 +143,35 @@ function Home() {
             {sim.familyHistory.map((c, i) => (
               <span key={i} className="inline-flex items-center gap-1 rounded-full bg-[color:var(--accent)] px-2 py-0.5 text-[11px] font-bold">
                 {c}
-                {sim.viewAs === "parent" && (
-                  <button
-                    onClick={() => setSim({ familyHistory: sim.familyHistory.filter((_, j) => j !== i) })}
-                    aria-label="Remove condition"
-                  >
-                    <X size={10} />
-                  </button>
-                )}
+                <button
+                  onClick={() => setSim({ familyHistory: sim.familyHistory.filter((_, j) => j !== i) })}
+                  aria-label="Remove condition"
+                >
+                  <X size={10} />
+                </button>
               </span>
             ))}
           </div>
-          {sim.viewAs === "parent" && (
-            <div className="mt-2 flex gap-1.5">
-              <input
-                value={newCondition}
-                onChange={(e) => setNewCondition(e.target.value)}
-                placeholder="e.g. High blood pressure (mom)"
-                className="flex-1 rounded-xl border-2 border-border bg-secondary px-2 py-1 text-xs font-bold outline-none focus:border-[color:var(--primary)]"
-              />
-              <button
-                onClick={() => {
-                  if (newCondition.trim()) {
-                    setSim({ familyHistory: [...sim.familyHistory, newCondition.trim()] });
-                    setNewCondition("");
-                  }
-                }}
-                className="grid h-8 w-8 place-items-center rounded-xl bg-[color:var(--primary)] text-[color:var(--primary-foreground)]"
-                aria-label="Add condition"
-              >
-                <Plus size={14} />
-              </button>
-            </div>
-          )}
-
+          <div className="mt-2 flex gap-1.5">
+            <input
+              value={newCondition}
+              onChange={(e) => setNewCondition(e.target.value)}
+              placeholder="e.g. High blood pressure (mom)"
+              className="flex-1 rounded-xl border-2 border-border bg-secondary px-2 py-1 text-xs font-bold outline-none focus:border-[color:var(--primary)]"
+            />
+            <button
+              onClick={() => {
+                if (newCondition.trim()) {
+                  setSim({ familyHistory: [...sim.familyHistory, newCondition.trim()] });
+                  setNewCondition("");
+                }
+              }}
+              className="grid h-8 w-8 place-items-center rounded-xl bg-[color:var(--primary)] text-[color:var(--primary-foreground)]"
+              aria-label="Add condition"
+            >
+              <Plus size={14} />
+            </button>
+          </div>
 
           {recs && (
             <div className="mt-3 rounded-2xl bg-[color:var(--leaf)] p-2.5">

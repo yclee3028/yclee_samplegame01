@@ -227,13 +227,6 @@ export function removeWishlistItem(id: string) {
   state = { ...state, wishlist: state.wishlist.filter((w) => w.id !== id) };
   persist(); emit();
 }
-export function updateWishlistGems(id: string, gems: number) {
-  state = {
-    ...state,
-    wishlist: state.wishlist.map((w) => (w.id === id ? { ...w, requestedGems: Math.max(1, gems) } : w)),
-  };
-  persist(); emit();
-}
 
 
 export function unlinkParent() {

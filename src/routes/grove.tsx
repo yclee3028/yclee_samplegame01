@@ -215,11 +215,10 @@ function Grove() {
           <Link
             to="/journal"
             className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-[11px] font-bold"
-            aria-label={sim.viewAs === "parent" ? "View journal" : "Edit mood in journal"}
+            aria-label="Edit mood in journal"
           >
-            <Pencil size={11} /> {sim.viewAs === "parent" ? "View Journal" : "Edit in Journal"}
+            <Pencil size={11} /> Edit in Journal
           </Link>
-
         </section>
 
         {/* Focus timer */}

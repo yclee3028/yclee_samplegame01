@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppHeader } from "@/components/AppHeader";
-import { Heart, MessageCircle, UserPlus, X, Lock } from "lucide-react";
+import { Heart, MessageCircle, UserPlus, X } from "lucide-react";
 import { useState } from "react";
-import { useSim } from "@/lib/sim-store";
-
 
 export const Route = createFileRoute("/friends")({
   head: () => ({
@@ -26,8 +24,6 @@ const feed = [
 ];
 
 function Friends() {
-  const sim = useSim();
-  const isParent = sim.viewAs === "parent";
   const [inviteOpen, setInviteOpen] = useState(false);
   const [username, setUsername] = useState("");
   const [sent, setSent] = useState<string | null>(null);
@@ -45,19 +41,8 @@ function Friends() {
       <AppHeader title="Friends" subtitle="Your little garden of pals 🌷" />
 
       <div className="space-y-3 px-4 pt-4">
-        {isParent && (
-          <section className="cute-card flex items-center gap-2 bg-[color:var(--sky)]/30 p-2.5">
-            <Lock size={14} className="text-[color:var(--primary-dark)]" />
-            <p className="text-[11px] font-bold text-muted-foreground">
-              Parent view — Friends is read-only.
-            </p>
-          </section>
-        )}
-
         {/* invite */}
-        {!isParent && (
         <div className="cute-card p-3">
-
           <button
             onClick={() => setInviteOpen((o) => !o)}
             className="flex w-full items-center gap-3 text-left active:translate-y-0.5"
@@ -104,8 +89,6 @@ function Friends() {
             </div>
           )}
         </div>
-        )}
-
 
         {/* stories */}
         <div className="flex gap-3 overflow-x-auto pb-1">
@@ -120,16 +103,15 @@ function Friends() {
         </div>
 
         {feed.map((post, i) => (
-          <FeedCard key={i} post={post} readOnly={isParent} />
+          <FeedCard key={i} post={post} />
         ))}
-
         <div className="h-2" />
       </div>
     </div>
   );
 }
 
-function FeedCard({ post, readOnly = false }: { post: (typeof feed)[number]; readOnly?: boolean }) {
+function FeedCard({ post }: { post: (typeof feed)[number] }) {
   const [liked, setLiked] = useState(false);
   return (
     <article className="cute-card overflow-hidden">
@@ -149,22 +131,17 @@ function FeedCard({ post, readOnly = false }: { post: (typeof feed)[number]; rea
       </div>
       <div className="flex items-center gap-4 px-4 py-3">
         <button
-          onClick={() => !readOnly && setLiked((l) => !l)}
-          disabled={readOnly}
-          className="flex items-center gap-1.5 text-xs font-black disabled:cursor-not-allowed disabled:opacity-70"
+          onClick={() => setLiked((l) => !l)}
+          className="flex items-center gap-1.5 text-xs font-black"
           style={{ color: liked ? "var(--berry-foreground)" : "var(--muted-foreground)" }}
         >
           <Heart size={16} fill={liked ? "currentColor" : "none"} strokeWidth={2.5} />
           {post.likes + (liked ? 1 : 0)}
         </button>
-        <button
-          disabled={readOnly}
-          className="flex items-center gap-1.5 text-xs font-black text-muted-foreground disabled:cursor-not-allowed disabled:opacity-70"
-        >
+        <button className="flex items-center gap-1.5 text-xs font-black text-muted-foreground">
           <MessageCircle size={16} strokeWidth={2.5} /> Cheer
         </button>
       </div>
     </article>
   );
 }
-

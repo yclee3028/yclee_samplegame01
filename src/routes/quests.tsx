@@ -8,12 +8,14 @@ import {
   Flame,
   Trophy,
   Phone,
+  TrendingUp,
+  Award,
   Pencil,
   Plus,
   X,
-  Gem,
-  Link2,
   Camera,
+  BookOpen,
+  Gem,
 } from "lucide-react";
 
 
@@ -29,12 +31,7 @@ export const Route = createFileRoute("/quests")({
   component: Quests,
 });
 
-type Daily = {
-  t: string; p: number; g: number; e: string; aiHint: string;
-  gemReward: number; awarded?: boolean;
-  linkedApp?: string;
-  aiVerify?: boolean;
-};
+type Daily = { t: string; p: number; g: number; e: string; aiHint: string; gemReward: number; awarded?: boolean };
 
 
 const initialSagas = [
@@ -43,17 +40,27 @@ const initialSagas = [
   { t: "Bedtime before 10pm × 14 nights", milestones: 14, done: 6, e: "🌙", checked: false, gemReward: 60, awarded: false },
 ];
 
+
+const achievements = [
+  { e: "🌱", t: "First Sprout", d: "Planted your first seed" },
+  { e: "💧", t: "Hydra's Friend", d: "7 day water streak" },
+  { e: "🌙", t: "Early Bird", d: "Slept by 10pm × 5" },
+  { e: "🦊", t: "Brave Heart", d: "Hit Lvl 10" },
+  { e: "🌳", t: "Tree-Mendous", d: "Grew 10 plants" },
+  { e: "📵", t: "Off-Grid", d: "2h focus session" },
+];
+
 // Quest booklet is built from journal "One little thought" logs now.
 
 function Quests() {
   const sim = useSim();
   const isParent = sim.viewAs === "parent";
+  const [tab, setTab] = useState<"today" | "record">("today");
   const [daily, setDaily] = useState<Daily[]>([
-    { t: "Drink 8 glasses of water", p: 0, g: 8, e: "💧", aiHint: "a water bottle or glass of water", gemReward: 10, aiVerify: true, linkedApp: "None" },
-    { t: "Walk 5,000 steps", p: 0, g: 5000, e: "👟", aiHint: "outdoor scene, shoes, or step tracker", gemReward: 15, aiVerify: true, linkedApp: "None" },
-    { t: "10 minute stretch", p: 0, g: 1, e: "🧘", aiHint: "person stretching or yoga mat", gemReward: 8, aiVerify: true, linkedApp: "None" },
+    { t: "Drink 8 glasses of water", p: 0, g: 8, e: "💧", aiHint: "a water bottle or glass of water", gemReward: 10 },
+    { t: "Walk 5,000 steps", p: 0, g: 5000, e: "👟", aiHint: "outdoor scene, shoes, or step tracker", gemReward: 15 },
+    { t: "10 minute stretch", p: 0, g: 1, e: "🧘", aiHint: "person stretching or yoga mat", gemReward: 8 },
   ]);
-
   const [sagas, setSagas] = useState(initialSagas);
   const [editing, setEditing] = useState(false);
   const [editingHistoric, setEditingHistoric] = useState(false);
@@ -102,14 +109,30 @@ function Quests() {
   return (
     <div>
       <AppHeader title="Quests" subtitle="Tiny wins, every day 🏅" />
+      <div className="px-4 pt-3">
+        <div className="cute-card flex p-1">
+          {(["today", "record"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className="flex-1 rounded-xl py-2 text-xs font-bold uppercase tracking-wide transition-colors"
+              style={{
+                background: tab === t ? "var(--primary)" : "transparent",
+                color: tab === t ? "var(--primary-foreground)" : "var(--muted-foreground)",
+              }}
+            >
+              {t === "today" ? "Today & long-term" : "Record"}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {true ? (
+      {tab === "today" ? (
         <div className="space-y-3 px-4 pt-4">
           {/* off-phone streak hero */}
           <section className="cute-card overflow-hidden bg-gradient-to-r from-[color:var(--sun)] to-[color:var(--leaf)] p-4 text-[color:var(--leaf-foreground)]">
             <div className="flex items-center gap-2">
               <Phone size={16} strokeWidth={3} />
-
               <p className="text-xs font-bold uppercase">Off-phone streak</p>
             </div>
             <div className="mt-2 flex items-end justify-between">
@@ -211,66 +234,22 @@ function Quests() {
                               className="w-16 rounded-lg border border-border bg-secondary px-2 py-0.5 text-xs"
                             />
                           </div>
-                          {(q.aiVerify ?? true) && (
-                            <div className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground">
-                              <label>What should AI look for in the photo?</label>
-                              <textarea
-                                rows={2}
-                                value={q.aiHint}
-                                onChange={(e) => {
-                                  const v = e.target.value;
-                                  setDaily((d) =>
-                                    d.map((x, i) => (i === idx ? { ...x, aiHint: v } : x))
-                                  );
-                                }}
-                                placeholder="e.g. a glass of water on a desk"
-                                className="w-full rounded-lg border border-border bg-secondary px-2 py-1 text-[11px] font-bold outline-none focus:border-[color:var(--primary)]"
-                              />
-                            </div>
-                          )}
-                          {isParent && (
-                            <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setDaily((d) =>
-                                    d.map((x, i) =>
-                                      i === idx ? { ...x, aiVerify: !(x.aiVerify ?? true) } : x,
-                                    ),
-                                  )
-                                }
-                                className="inline-flex items-center gap-1 rounded-full border-2 border-border bg-secondary px-2 py-1 text-[10px] font-black uppercase"
-                                style={{
-                                  background: (q.aiVerify ?? true) ? "var(--accent)" : "var(--muted)",
-                                }}
-                                title="Toggle AI photo verification"
-                              >
-                                <Camera size={11} />
-                                {(q.aiVerify ?? true) ? "AI photo on" : "AI photo off"}
-                              </button>
-                              <label className="inline-flex items-center gap-1 rounded-full border-2 border-border bg-secondary px-2 py-1 text-[10px] font-black uppercase">
-                                <Link2 size={11} />
-                                <select
-                                  value={q.linkedApp ?? "None"}
-                                  onChange={(e) => {
-                                    const v = e.target.value;
-                                    setDaily((d) =>
-                                      d.map((x, i) => (i === idx ? { ...x, linkedApp: v } : x)),
-                                    );
-                                  }}
-                                  className="bg-transparent text-[10px] font-black uppercase outline-none"
-                                >
-                                  <option>None</option>
-                                  <option>Fitbit</option>
-                                  <option>Strava</option>
-                                  <option>Apple Health</option>
-                                  <option>Google Fit</option>
-                                </select>
-                              </label>
-                            </div>
-                          )}
+                          <div className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground">
+                            <label>What should AI look for in the photo?</label>
+                            <textarea
+                              rows={2}
+                              value={q.aiHint}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                setDaily((d) =>
+                                  d.map((x, i) => (i === idx ? { ...x, aiHint: v } : x))
+                                );
+                              }}
+                              placeholder="e.g. a glass of water on a desk"
+                              className="w-full rounded-lg border border-border bg-secondary px-2 py-1 text-[11px] font-bold outline-none focus:border-[color:var(--primary)]"
+                            />
+                          </div>
                         </div>
-
                       ) : (
                         <>
                           <div className="flex items-center justify-between gap-2">
@@ -303,7 +282,7 @@ function Quests() {
                       )
                     ) : (
                       <div className="flex shrink-0 items-center gap-1.5">
-                        {!done && (q.aiVerify ?? true) && (
+                        {!done && (
                           <button
                             onClick={() => snapPhoto(idx)}
                             className="grid h-9 w-9 place-items-center rounded-full border-2 border-[color:var(--primary-dark)] bg-[color:var(--accent)] text-[color:var(--primary-dark)] active:translate-y-0.5"
@@ -313,29 +292,25 @@ function Quests() {
                             <Plus size={16} strokeWidth={3} />
                           </button>
                         )}
-                        <button
-                          onClick={() => !done && completeDaily(idx)}
-                          disabled={done}
-                          className="grid h-9 w-9 place-items-center rounded-full border-2 disabled:cursor-not-allowed"
+                        <div
+                          className="grid h-9 w-9 place-items-center rounded-full border-2"
                           style={{
                             background: done ? "var(--primary)" : "transparent",
                             borderColor: done ? "var(--primary-dark)" : "var(--border)",
                             color: done ? "var(--primary-foreground)" : "var(--muted-foreground)",
                           }}
-                          aria-label="Mark complete"
                         >
                           <Check size={18} strokeWidth={3} />
-                        </button>
+                        </div>
                       </div>
                     )}
-
                   </div>
                 );
               })}
               {isParent && daily.length < 5 && (
                 <button
                   onClick={() =>
-                    setDaily((d) => [...d, { t: "New quest", p: 0, g: 1, e: "✨", aiHint: "", gemReward: 10, aiVerify: true, linkedApp: "None" }])
+                    setDaily((d) => [...d, { t: "New quest", p: 0, g: 1, e: "✨", aiHint: "", gemReward: 10 }])
                   }
                   className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[color:var(--primary-dark)] py-3 text-xs font-bold text-[color:var(--primary-dark)]"
                 >
@@ -529,8 +504,75 @@ function Quests() {
           })()}
           <div className="h-2" />
         </div>
-      ) : null}
+      ) : (
+        <div className="space-y-3 px-4 pt-4">
+          {/* hero stats — compact */}
+          <section className="grid grid-cols-4 gap-1.5">
+            <BigStat icon={<Flame size={12} />} value="5d" label="Longest" tint="var(--sun)" />
+            <BigStat icon={<Trophy size={12} />} value="4" label="Done" tint="var(--leaf)" />
+            <BigStat icon={<Award size={12} />} value="1" label="Awards" tint="var(--berry)" />
+            <BigStat icon={<TrendingUp size={12} />} value="Walk" label="Top" tint="var(--sky)" />
+          </section>
 
+          {/* Photo booklet — entries from "One little thought" in Journal */}
+          <CollapsibleSection
+            title="Quest booklet"
+            hint={`${sim.journalLogs.length} journal entr${sim.journalLogs.length === 1 ? "y" : "ies"}`}
+            icon={<BookOpen size={14} />}
+            defaultOpen
+          >
+            {sim.journalLogs.length === 0 ? (
+              <p className="rounded-2xl bg-secondary p-4 text-center text-[11px] font-bold text-muted-foreground">
+                Your booklet fills up as you save thoughts in the Journal's
+                "One little thought" tab.
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {sim.journalLogs.map((log, i) => (
+                  <div key={i} className="overflow-hidden rounded-2xl bg-secondary">
+                    <div
+                      className="grid h-20 place-items-center text-3xl"
+                      style={{ background: "var(--accent)" }}
+                    >
+                      {log.emoji}
+                    </div>
+                    <div className="p-2">
+                      <p className="line-clamp-3 text-[11px] font-bold leading-snug">{log.text}</p>
+                      <p className="mt-1 text-[10px] font-bold text-muted-foreground">
+                        Day {log.day} · {log.date}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CollapsibleSection>
+
+          <CollapsibleSection
+            title="Achievements"
+            hint={`${achievements.length} unlocked`}
+            icon={<Award size={14} />}
+          >
+            <div className="grid grid-cols-3 gap-2">
+              {achievements.map((a) => (
+                <div
+                  key={a.t}
+                  className="flex flex-col items-center gap-1 rounded-2xl bg-secondary p-3 text-center"
+                >
+                  <div className="grid h-12 w-12 place-items-center rounded-full bg-card text-2xl">
+                    {a.e}
+                  </div>
+                  <p className="text-[11px] font-bold leading-tight">{a.t}</p>
+                  <p className="text-[9px] font-bold leading-tight text-muted-foreground">
+                    {a.d}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CollapsibleSection>
+          <div className="h-2" />
+        </div>
+      )}
 
       {photoFor !== null && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-6">
@@ -576,3 +618,32 @@ function Quests() {
   );
 }
 
+function BigStat({
+  icon,
+  value,
+  label,
+  tint,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  label: string;
+  tint: string;
+}) {
+  return (
+    <div className="cute-card p-2" style={{ background: tint }}>
+      <div className="flex items-center gap-1 text-[9px] font-bold uppercase opacity-80">
+        {icon}
+        {label}
+      </div>
+      <p className="mt-0.5 text-sm font-black">{value}</p>
+    </div>
+  );
+}
+function Legend({ c, l }: { c: string; l: string }) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      <span className="h-2 w-2 rounded-full" style={{ background: c }} />
+      {l}
+    </span>
+  );
+}
